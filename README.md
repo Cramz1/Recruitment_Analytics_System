@@ -1,8 +1,9 @@
 # Introduction
 
-📊 Dive into the recruitment analytics market! Focusing on **remote Data roles**, this project explores:
+📊 Dive into the recruitment analytics market! Using a fictional-but-realistic dataset, this project explores which **roles** and **skills** drive demand and compensation outcomes.
 
-- 💰 **Top-paying job postings**
+
+- 💰 **Top-paying job placements**
 - 🧠 **Skills required for top-paying roles**
 - 📈 **Most in-demand skills**
 - 🏆 **Top-paying skills**
@@ -16,13 +17,14 @@ As a recruitment agency, this project was created to better understand **which r
 The goal is to identify **top-paying roles**, **most in-demand skills**, and the **optimal skills to learn** by combining both demand and compensation insights.
 
 The dataset used in this project is **fictional but realistic**, and it is **based on real-world patterns and compensation ranges** from my own recruitment agency experience.  
-It includes job postings, target compensation, work mode, and skill requirements linked through a bridge table.
+It includes job placements, target compensation, work mode, and skill requirements linked through a bridge table.
+
 
 ## The questions I wanted to answer through my SQL queries were:
 
-1. Which **remote Data job postings** offer the highest target compensation?
+1. Which **remote Data job placements** offer the highest target compensation?
 2. Which skills are required for these **top-paying remote Data roles**?
-3. What are the most **in-demand skills** across all job postings 
+3. What are the most **in-demand skills** across all job placements in the dataset?
 4. Which skills are associated with **higher average target compensation**?
 5. What are the most **optimal skills to learn** (High Demand AND High Paying)?
 
@@ -39,8 +41,8 @@ For this project, I used a combination of SQL and documentation tools to analyze
 - **Data Visualization (Bar Chart)**: Used to visualize skill frequency across top-paying roles.
 - **Microsoft Word**: Used to export a short portfolio-ready insights report.
 
-## 1. Top Paying Remote Data Job Postings
-To identify the highest-paying opportunities, I filtered the dataset to **remote roles** within the **Data job category** and ranked job postings by **TargetRate_k** (target compensation). This query highlights which remote Data jobs offer the strongest earning potential in this recruitment dataset.
+## 1. Top Paying Remote Data Job Placements
+To identify the highest-paying opportunities, I filtered the dataset to **remote roles** within the **Data job category** and ranked job placements by **TargetRate_k** (target compensation). This query highlights which remote Data jobs offer the strongest earning potential in this recruitment dataset.
 
 ```sql
 SELECT DISTINCT
@@ -59,7 +61,7 @@ ORDER BY job.targetrate_k DESC;
 
  ```
 
- ### Here’s the breakdown of the top-paying remote Data job postings:
+ ### Here’s the breakdown of the top-paying remote Data job placements:
 
 - **Role Variety:** High-paying opportunities include both analytics and engineering-focused Data roles.
 - **Remote Pay Potential:** Remote work does not limit earning potential—top remote roles still offer strong compensation.
@@ -67,12 +69,12 @@ ORDER BY job.targetrate_k DESC;
 
 
 ![Average Salary Distribution for Top Paying Remote Data Jobs](assets/query1_top_paying_remote_data_jobs.png)
-*Bar graph visualizing the target compensation for the top-paying remote Data job postings; ChatGPT generated this graph from my SQL query results.*
+*Bar graph visualizing the target compensation for the top-paying remote Data job placements; ChatGPT generated this graph from my SQL query results.*
 
 
 ## 2. Skills Required for Top-Paying Remote Data Jobs
 
-To identify the skills required for the highest-paying opportunities, I first selected the top-paying **remote roles** within the **Data job category** using TargetRate_k (target compensation). I then joined these jobs to the job-to-skill bridge table to retrieve the skills associated with each role. This query highlights which skills are most commonly required in top-paying remote Data job postings.
+To identify the skills required for the highest-paying opportunities, I first selected the top-paying **remote roles** within the **Data job category** using TargetRate_k (target compensation). I then joined these jobs to the job-to-skill bridge table to retrieve the skills associated with each role. This query highlights which skills are most commonly required in top-paying remote Data job placements.
 
 
 ```sql
@@ -139,9 +141,10 @@ ORDER BY
 | J009  | Data analyst                   | Remote    | 85                    | Power BI        |
 | J009  | Data analyst                   | Remote    | 85                    | Python          |
 
-*Table summarizing the skills linked to the top-paying remote Data job postings (Top 3 by TargetRate_k).*
+*Table summarizing the skills linked to the top-paying remote Data job placements (Top 3 by TargetRate_k).*
 
 ## 3. Most In-Demand Skills (All Job Placements)
+
 
 To identify the most in-demand skills, I analyzed all job placements in the dataset and counted how often each skill appears across roles. By joining job placements to the job-to-skill bridge table, this query highlights which skills employers request most frequently overall in this recruitment dataset.
 
@@ -149,27 +152,23 @@ To identify the most in-demand skills, I analyzed all job placements in the data
 ```sql
 SELECT
     skill.skill_name,
-    COUNT(*) AS demand_count
+    COUNT(DISTINCT pipeline.jobid) AS demand_count
 FROM fact_recruitmentpipeline AS pipeline
-INNER JOIN dim_job AS job
-    ON pipeline.jobid = job.jobid
-INNER JOIN dim_workmode AS work_mode
-    ON pipeline.workmodeid = work_mode.workmodeid
 INNER JOIN bridge_job_skill AS job_skill
     ON pipeline.jobid = job_skill.jobid
 INNER JOIN dim_skill AS skill
     ON job_skill.skillid = skill.skillid
-WHERE job.jobcategory = 'Data'
-  AND work_mode.is_remote = 'Yes'
-GROUP BY skill.skill_name
-ORDER BY demand_count DESC;
+GROUP BY
+    skill.skill_name
+ORDER BY
+    demand_count DESC
+LIMIT 5;
 
  ```
-
- ### Here’s the breakdown of the most in-demand skills across job postings in the dataset:
+ ### Here’s the breakdown of the most in-demand skills across job placements in the dataset:
 
 - **Baseline Skills Matter:** High-frequency skills like Excel appear across many roles, making them strong foundational requirements in this dataset.
-- **Technical Breadth Shows Up:** Python, Linux, and Networking show consistent demand, reflecting the importance of technical versatility across job postings.
+- **Technical Breadth Shows Up:** Python, Linux, and Networking show consistent demand, reflecting the importance of technical versatility across job placements.
 - **Hiring Priorities by Frequency:** Skills with higher counts represent what employers request most often across the full set of roles in the dataset.
 
 | skill_name          | demand_count |
@@ -180,7 +179,7 @@ ORDER BY demand_count DESC;
 | Networking         |            4 |
 | Quality Assurance  |            4 |
 
-*Table summarizing the most in-demand skills across job postings in the dataset (Ranked by frequency).*
+*Table summarizing the most in-demand skills across job placements in the dataset (Ranked by frequency).*
 
 
 ## 4. Top-Paying Skills (All Job Placements)
@@ -220,9 +219,10 @@ ORDER BY avg_target_compensation_k DESC;
 | Networking               |                     83.12 |
 | Linux                    |                     82.05 |
 | Power BI                 |                     81.64 |
-| ETL                      |
+| ETL                      |                     80.96 |
 
 *Table summarizing the top-paying skills across all job placements in the dataset (Ranked by average TargetRate_k).*
+
 
 ## 5. Optimal Skills to Learn (High Demand + High Paying)
 
@@ -248,26 +248,29 @@ ORDER BY
 
  ```
 
-### Here’s the breakdown of the top-paying skills across all job placements:
+### Here’s the breakdown of the most optimal skills to learn (High Demand + High Paying):
 
-- **Cloud + Data Engineering Skills Lead Pay:** Skills like Cloud Data Platforms, Data Modeling, and ETL are strongly associated with higher average target compensation.
-- **Technical + Collaboration Skills Matter:** Python and Git show that employers value both strong technical execution and the ability to work in modern development workflows.
-- **Infrastructure Knowledge Adds Value:** Linux and Networking appear among the highest-paying skills, highlighting the importance of system-level understanding in higher-compensated roles.
+- **Best ROI Skills:** These skills combine strong demand with strong compensation, making them the most strategic skills to learn first.
+- **Balanced Skill Priorities:** Skills like Python, Linux, and Networking show both strong demand and strong pay across placements, making them high-impact learning targets.
+- **Mix of Technical + Analytics Skills:** The results include programming, infrastructure, and BI skills—showing that the best opportunities often require a versatile skill set.
 
-| skill_name               | avg_target_compensation_k |
-|-------------------------|--------------------------:|
-| Cloud Data Platforms     |                     88.00 |
-| Customer Communication   |                     88.00 |
-| Data Modeling            |                     87.37 |
-| Python                   |                     86.72 |
-| Git                      |                     83.65 |
-| Monitoring               |                     83.24 |
-| Networking               |                     83.12 |
-| Linux                    |                     82.05 |
-| Power BI                 |                     81.64 |
-| ETL                      |                     80.96 |
 
-*Table summarizing the top-paying skills across all job placements in the dataset (Ranked by average TargetRate_k).*
+| skill_id | skills           | demand_count | avg_salary |
+|--------:|------------------|-------------:|-----------:|
+| S036    | Python           |            5 |      86.72 |
+| S021    | Git              |            3 |      83.65 |
+| S030    | Networking       |            4 |      83.12 |
+| S028    | Linux            |            5 |      82.05 |
+| S033    | Power BI         |            3 |      81.64 |
+| S042    | SQL              |            4 |      80.26 |
+| S009    | Cloud Platforms  |            3 |      80.13 |
+| S026    | Java             |            3 |      80.04 |
+| S011    | DAX              |            3 |      79.20 |
+| S032    | Planning         |            3 |      79.20 |
+
+
+*Table summarizing the most optimal skills to learn across all job placements in the dataset (High Demand + High Paying).*
+
 
 ## What I Learned
 
@@ -289,5 +292,6 @@ Throughout this project, I strengthened my recruitment analytics toolkit and sha
 
 ### Closing Thoughts
 
-This project strengthened my SQL skills and gave me practical insight into how job placements connect **skills**, **demand**, and **compensation** in the recruitment market. By analyzing which skills are most requested and which skills are linked to higher target pay, I was able to identify a clear set of “high ROI” skills to prioritize. Overall, this analysis reinforced the value
+This project strengthened my SQL skills and gave me practical insight into how job placements connect **skills**, **demand**, and **compensation** in the recruitment market. By analyzing which skills are most requested and which skills are linked to higher target pay, I was able to identify a clear set of “high ROI” skills to prioritize. Overall, this analysis reinforced the value of focusing on skills that align with both hiring demand and compensation outcomes.
+
 

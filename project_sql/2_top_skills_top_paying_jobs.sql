@@ -1,0 +1,175 @@
+/*
+Business Question:
+Which skills are required for the top-paying remote Data job postings?
+
+Notes:
+- Only jobs in the Data job category are included (jobcategory = 'Data')
+- Only remote work positions are included (is_remote = 'Yes')
+- "Top-paying jobs" are defined as the top 3 job postings based on TargetRate_k
+- Skills are retrieved via the job-to-skill bridge table (bridge_job_skill)
+- Results list each top-paying job with its associated skills, sorted by compensation
+
+Dataset:
+Fictional but realistic recruitment dataset created for portfolio demonstration purposes.
+*/
+
+
+WITH remote_data_jobs AS (
+    SELECT DISTINCT
+        job.jobid,
+        job.jobdescription AS job_title,
+        work_mode.workmode_name AS work_mode,
+        job.targetrate_k AS target_compensation_k
+    FROM fact_recruitmentpipeline AS pipeline
+    INNER JOIN dim_job AS job
+        ON pipeline.jobid = job.jobid
+    INNER JOIN dim_workmode AS work_mode
+        ON pipeline.workmodeid = work_mode.workmodeid
+    WHERE job.jobcategory = 'Data'
+      AND work_mode.is_remote = 'Yes'
+),
+top_paying_jobs AS (
+    SELECT *
+    FROM remote_data_jobs
+    ORDER BY target_compensation_k DESC
+    LIMIT 3
+)
+
+SELECT
+    top_jobs.jobid,
+    top_jobs.job_title,
+    top_jobs.work_mode,
+    top_jobs.target_compensation_k,
+    skill.skill_name
+FROM top_paying_jobs AS top_jobs
+INNER JOIN bridge_job_skill AS job_skill
+    ON top_jobs.jobid = job_skill.jobid
+INNER JOIN dim_skill AS skill
+    ON job_skill.skillid = skill.skillid
+ORDER BY
+    top_jobs.target_compensation_k DESC,
+    top_jobs.job_title,
+    skill.skill_name;
+
+/*
+
+📈 Skill Frequency Insights
+Here’s the breakdown of the most in-demand skills across the top-paying remote Data jobs (Top 3):
+
+Python is leading with a count of 3.
+
+Excel is tied at the top with a count of 3.
+
+SQL, Power BI, and Data Modeling follow with counts of 2 each.
+
+Other skills like ETL, Reporting, and DAX appear less frequently, with a count of 1 each.
+
+[
+  {
+    "jobid": "J011",
+    "job_title": "Data engineer",
+    "work_mode": "Remote",
+    "target_compensation_k": 90,
+    "skill_name": "Data Modeling"
+  },
+  {
+    "jobid": "J011",
+    "job_title": "Data engineer",
+    "work_mode": "Remote",
+    "target_compensation_k": 90,
+    "skill_name": "ETL"
+  },
+  {
+    "jobid": "J011",
+    "job_title": "Data engineer",
+    "work_mode": "Remote",
+    "target_compensation_k": 90,
+    "skill_name": "Excel"
+  },
+  {
+    "jobid": "J011",
+    "job_title": "Data engineer",
+    "work_mode": "Remote",
+    "target_compensation_k": 90,
+    "skill_name": "Python"
+  },
+  {
+    "jobid": "J011",
+    "job_title": "Data engineer",
+    "work_mode": "Remote",
+    "target_compensation_k": 90,
+    "skill_name": "SQL"
+  },
+  {
+    "jobid": "J010",
+    "job_title": "Business intelligence analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 88,
+    "skill_name": "Excel"
+  },
+  {
+    "jobid": "J010",
+    "job_title": "Business intelligence analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 88,
+    "skill_name": "Power BI"
+  },
+  {
+    "jobid": "J010",
+    "job_title": "Business intelligence analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 88,
+    "skill_name": "Python"
+  },
+  {
+    "jobid": "J010",
+    "job_title": "Business intelligence analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 88,
+    "skill_name": "Reporting"
+  },
+  {
+    "jobid": "J010",
+    "job_title": "Business intelligence analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 88,
+    "skill_name": "SQL"
+  },
+  {
+    "jobid": "J009",
+    "job_title": "Data analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 85,
+    "skill_name": "Data Modeling"
+  },
+  {
+    "jobid": "J009",
+    "job_title": "Data analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 85,
+    "skill_name": "DAX"
+  },
+  {
+    "jobid": "J009",
+    "job_title": "Data analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 85,
+    "skill_name": "Excel"
+  },
+  {
+    "jobid": "J009",
+    "job_title": "Data analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 85,
+    "skill_name": "Power BI"
+  },
+  {
+    "jobid": "J009",
+    "job_title": "Data analyst",
+    "work_mode": "Remote",
+    "target_compensation_k": 85,
+    "skill_name": "Python"
+  }
+]
+
+*/
